@@ -12,28 +12,20 @@ import os
 
 @shared_task
 def generate_thumbnail(photo_id):
-    # Fetch the photo object
     photo = Photo.objects.get(id=photo_id)
 
-    # Open the uploaded image file
-    image_path = photo.image.path  # Get the path of the original image
+    image_path = photo.image.path  
     img = Image.open(image_path)
 
-    # Define the thumbnail size (e.g., 200x200)
     thumbnail_size = (150, 150)
-
-    # Resize the image
     img.thumbnail(thumbnail_size)
 
-    # Save the thumbnail to a temporary in-memory file
     thumb_io = BytesIO()
     img.save(thumb_io, img.format)
     thumb_io.seek(0)
 
-    # Save the thumbnail to the `thumbnail` field
-    # Create an InMemoryUploadedFile to be saved in the model
     photo.thumbnail.save(
-        os.path.basename(photo.image.name),  # Use original image name for thumbnail
+        os.path.basename(photo.image.name), 
         InMemoryUploadedFile(
             thumb_io, None, photo.image.name, 'image/jpeg', thumb_io.getbuffer().nbytes, None
         ),
